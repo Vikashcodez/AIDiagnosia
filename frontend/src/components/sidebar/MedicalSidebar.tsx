@@ -86,20 +86,6 @@ export function MedicalSidebar({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
                   <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)]">
-                    <div className="mb-6">
-                      {user ? (
-                        <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-accent/50">
-                          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-                            {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">{user.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                    
                     <div className="space-y-1">
                       {navItems.map((item) => (
                         <Link
@@ -126,9 +112,6 @@ export function MedicalSidebar({ children }: { children: React.ReactNode }) {
                   </DrawerClose>
                 </DrawerContent>
               </Drawer>
-              <div className="font-medium text-foreground">
-                {currentPage}
-              </div>
             </div>
             
             {/* Show UserAvatar for mobile - it will adapt based on props */}
@@ -198,13 +181,7 @@ export function MedicalSidebar({ children }: { children: React.ReactNode }) {
           </SidebarContent>
         </Sidebar>
         <div className="flex-1 bg-background">
-          <div className="flex items-center justify-between h-[60px] px-6 border-b border-border bg-background">
-            <div className="flex items-center">
-              <div className="font-medium text-foreground">
-                {navItems.find(item => item.path === location.pathname)?.sidebarLabel || "Dashboard"}
-              </div>
-            </div>
-            
+          <div className="flex items-center justify-end h-[60px] px-6 border-b border-border bg-background">
             {/* Show UserAvatar for desktop */}
             {user ? (
               <UserAvatar isMobile={false} />

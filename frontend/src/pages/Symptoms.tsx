@@ -9,7 +9,6 @@ import { GeminiAnalysisError } from "@/components/symptoms/GeminiAnalysisError";
 import { GeminiAnalysisResult } from "@/components/symptoms/GeminiAnalysisResult";
 import { MedicalReportAnalysis } from "@/components/symptoms/MedicalReportAnalysis";
 import { HealthChatbot } from "@/components/symptoms/HealthChatbot";
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { DiseasePredictor } from "@/components/symptoms/DiseasePredictor";
 import { WelcomePopup } from "@/components/symptoms/WelcomePopup";
 import { diseases } from "@/data/diseaseData";
@@ -105,9 +104,8 @@ export default function Symptoms() {
   };
 
   return (
-    <MedicalSidebar>
-      <div className={`${isMobile ? 'px-4 py-6' : 'max-w-5xl mx-auto px-8 py-8'}`}>
-        <div className="flex flex-col gap-8">
+    <div className={`${isMobile ? 'px-4 py-6' : 'max-w-5xl mx-auto px-8 py-8'}`}>
+      <div className="flex flex-col gap-8">
           {/* Main symptom analysis */}
           <Card className="p-6 md:p-10 bg-card border border-border rounded-xl shadow-sm animate-fadeIn">
             <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-8">Symptom Analysis</h1>
@@ -164,10 +162,9 @@ export default function Symptoms() {
               <p className="text-sm md:text-base text-gray-500">No previous medical records found.</p>
             </Card>
           )}
-        </div>
       </div>
       
       <HealthChatbot />
-    </MedicalSidebar>
+    </div>
   );
 }

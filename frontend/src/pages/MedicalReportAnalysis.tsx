@@ -1,5 +1,4 @@
 
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { MedicalReportAnalysis } from "@/components/symptoms/MedicalReportAnalysis";
 import { HealthChatbot } from "@/components/symptoms/HealthChatbot";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,7 +7,7 @@ export default function MedicalReportAnalysisPage() {
   const isMobile = useIsMobile();
   
   return (
-    <MedicalSidebar>
+    <>
       <div className={`${isMobile ? 'px-1' : 'max-w-4xl mx-auto'}`}>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">Medical Report Analysis</h1>
         <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
@@ -18,6 +17,6 @@ export default function MedicalReportAnalysisPage() {
         <MedicalReportAnalysis />
       </div>
       <HealthChatbot />
-    </MedicalSidebar>
+    </>
   );
 }

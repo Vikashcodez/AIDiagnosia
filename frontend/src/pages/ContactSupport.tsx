@@ -1,6 +1,5 @@
 
 import React from "react";
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Mail, Phone } from "lucide-react";
 
@@ -8,8 +7,7 @@ export default function ContactSupport() {
   const isMobile = useIsMobile();
   
   return (
-    <MedicalSidebar>
-      <div className={`${isMobile ? 'px-4' : 'max-w-4xl mx-auto px-6'} py-8`}>
+    <div className={`${isMobile ? 'px-4' : 'max-w-4xl mx-auto px-6'} py-8`}>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Contact us</h1>
         <p className="text-sm text-gray-500 mb-6">Last updated on May 3rd 2025</p>
         
@@ -42,6 +40,6 @@ export default function ContactSupport() {
           </div>
         </div>
       </div>
-    </MedicalSidebar>
+    
   );
 }

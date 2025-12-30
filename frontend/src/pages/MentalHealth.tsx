@@ -1,5 +1,4 @@
 
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { MentalHealthChatbot } from "@/components/mental-health/MentalHealthChatbot";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -7,7 +6,7 @@ export default function MentalHealthPage() {
   const isMobile = useIsMobile();
   
   return (
-    <MedicalSidebar>
+    <>
       <div className={`${isMobile ? 'px-1' : 'max-w-4xl mx-auto'}`}>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">Mental Health Q&A</h1>
         <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
@@ -17,6 +16,6 @@ export default function MentalHealthPage() {
         </p>
         <MentalHealthChatbot />
       </div>
-    </MedicalSidebar>
+    </>
   );
 }

@@ -1,12 +1,10 @@
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PrivacyPolicy = () => {
   const isMobile = useIsMobile();
 
   return (
-    <MedicalSidebar>
-      <div className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-8'}`}>
+    <div className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-8'}`}>
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
           <p className="text-gray-600 mb-8">Last updated on Sep 16 2025</p>
@@ -80,7 +78,7 @@ const PrivacyPolicy = () => {
           </div>
         </div>
       </div>
-    </MedicalSidebar>
+    
   );
 };
 

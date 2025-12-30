@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DollarSign, EuroIcon, IndianRupee, JapaneseYen, Check } from "lucide-react";
 

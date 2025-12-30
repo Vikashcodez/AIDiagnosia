@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import { HealthTipsForm, UserData } from "@/components/health-tips/HealthTipsForm";
 import { HealthTipsDisplay } from "@/components/health-tips/HealthTipsDisplay";
 import { HealthChatbot } from "@/components/symptoms/HealthChatbot";
@@ -38,7 +37,7 @@ export default function HealthTipsPage() {
   };
   
   return (
-    <MedicalSidebar>
+    <>
       <div className={`${isMobile ? 'px-1' : 'max-w-4xl mx-auto'}`}>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">Personalized Health Tips</h1>
         <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
@@ -53,6 +52,6 @@ export default function HealthTipsPage() {
         )}
       </div>
       <HealthChatbot />
-    </MedicalSidebar>
+    </>
   );
 }
