@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 13%;
+    --primary: 174 72% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 96%;
+    --secondary-foreground: 220 13% 13%;
+    --muted: 220 13% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 13% 96%;
+    --accent-foreground: 220 13% 13%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 174 72% 56%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.011em;
+  }
+  
+  /* Ensure html and body take full height */
+  html, body, #root {
+    @apply min-h-screen bg-background;
+  }
+}
+
+.glass-card {
+  @apply bg-card border border-border rounded-lg shadow-sm;
+}
+
+.glass-form {
+  @apply bg-card border border-border rounded-lg;
+}
+
+.gradient-card {
+  @apply bg-card border border-border rounded-lg shadow-sm;
+}
+
+.gradient-medical {
+  @apply bg-gradient-to-r from-primary to-primary;
+}
+
+/* Smooth scrolling and better mobile experience */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better focus styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full hover:bg-muted-foreground/30 transition-colors;
+}
+
+/* Animations */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 2s infinite;
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Prose styles for medical information */
+.prose-medical h1, .prose-medical h2, .prose-medical h3, .prose-medical h4, .prose-medical h5, .prose-medical h6 {
+  @apply text-foreground font-semibold;
+}
+
+.prose-medical strong {
+  @apply text-foreground font-semibold;
+}
+
+.prose-medical ul li:before {
+  @apply text-primary;
+}
+
+/* Override for mobile */
+@media (max-width: 768px) {
+  body, html, #root {
+    @apply bg-background;
+  }
+}
+
+/* Card hover effects */
+.hover-lift {
+  @apply transition-all duration-200;
+}
+
+.hover-lift:hover {
+  @apply shadow-md;
+}
+
+/* Button animations */
+.btn-bounce:active {
+  @apply transform scale-95;
+}
+
+/* Form element focus states */
+input:focus, textarea:focus, select:focus {
+  @apply border-ring ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Badge styles */
+.badge-medical {
+  @apply bg-primary/10 text-primary px-2.5 py-1 rounded-md text-xs font-medium;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-md text-xs font-medium;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-700 px-2.5 py-1 rounded-md text-xs font-medium;
+}

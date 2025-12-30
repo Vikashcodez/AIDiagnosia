@@ -1,0 +1,10 @@
+project_id = "wfkgsxwltjqfeywnshtg"
+
+[functions.analyze-body-image]
+verify_jwt = false
+
+[functions.medical-ai]
+verify_jwt = false
+
+[functions.analyze-medical-report]
+verify_jwt = false
