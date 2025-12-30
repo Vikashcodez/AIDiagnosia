@@ -1,66 +1,29 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Mail, Lock, Brain, Shield, ActivitySquare } from "lucide-react";
+import { useAuth } from "@/context/authcontext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Store token and user data
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        toast({
-          title: "Success",
-          description: "Login successful!",
-          variant: "default",
-        });
-
-        // Redirect based on role
-        if (data.user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: data.message || "Login failed",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Network error. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+    const success = await login(email, password);
+    
+    if (!success) {
       setLoading(false);
     }
+    // Note: The AuthContext handles the navigation and sets loading state
   };
 
   return (

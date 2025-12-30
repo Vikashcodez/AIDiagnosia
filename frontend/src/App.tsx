@@ -1,9 +1,12 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/context/authcontext";
+import PrivateRoute from "@/components/PrivateRoute";
+import AdminRoute from "@/components/AdminRoute";
+import { MedicalSidebar } from "@/components/sidebar/MedicalSidebar";
 import Login from "./pages/Login";
 import Symptoms from "./pages/Symptoms";
 import BodyScanPage from "./pages/BodyScan";
@@ -23,7 +26,7 @@ import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import Register from "./pages/Register";
-
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   const queryClient = new QueryClient();
@@ -33,30 +36,108 @@ function App() {
       <TooltipProvider>
         <div className="bg-white min-h-screen">
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/symptoms" element={<Symptoms />} />
-              <Route path="/body-scan" element={<BodyScanPage />} />
-              <Route path="/disease-predictor" element={<DiseasePredictorPage />} />
-              <Route path="/future-risk-predictor" element={<FutureRiskPredictorPage />} />
-              <Route path="/diet-plan-generator" element={<DietPlanGeneratorPage />} />
-              <Route path="/medical-report-analysis" element={<MedicalReportAnalysisPage />} />
-              <Route path="/health-tips" element={<HealthTipsPage />} />
-              <Route path="/prescription-generator" element={<PrescriptionGeneratorPage />} />
-              <Route path="/mental-health" element={<MentalHealthPage />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/support" element={<ContactSupport />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/shipping-policy" element={<ShippingPolicy />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AuthProvider>
+              <Routes>
+                {/* Public Routes (No Authentication Required) */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/support" element={<ContactSupport />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/shipping-policy" element={<ShippingPolicy />} />
+
+                {/* Protected Routes with Sidebar (Requires Authentication) */}
+               
+                
+                <Route path="/symptoms" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <Symptoms />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/body-scan" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <BodyScanPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/disease-predictor" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <DiseasePredictorPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/future-risk-predictor" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <FutureRiskPredictorPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/diet-plan-generator" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <DietPlanGeneratorPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/medical-report-analysis" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <MedicalReportAnalysisPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/health-tips" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <HealthTipsPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/prescription-generator" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <PrescriptionGeneratorPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/mental-health" element={
+                  <PrivateRoute>
+                    <MedicalSidebar>
+                      <MentalHealthPage />
+                    </MedicalSidebar>
+                  </PrivateRoute>
+                } />
+
+                {/* Admin Routes (Requires Admin Authentication) */}
+                <Route path="/admin/dashboard" element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } />
+
+                {/* 404 Page */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+              <Sonner />
+            </AuthProvider>
           </BrowserRouter>
-          <Toaster />
-          <Sonner />
         </div>
       </TooltipProvider>
     </QueryClientProvider>
