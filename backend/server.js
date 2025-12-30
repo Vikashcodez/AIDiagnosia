@@ -10,6 +10,8 @@ import './config/database.js';
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import adminPaymentRoutes from './routes/adminPaymentRoutes.js';
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/admin/payment', adminPaymentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -39,11 +43,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 404 handler - FIXED: Use (req, res) directly instead of '*'
-app.use((req, res) => {
+// FIXED: 404 handler - Remove the '*' parameter
+app.use((req, res, next) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: `Route not found: ${req.method} ${req.originalUrl}`
   });
 });
 

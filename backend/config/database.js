@@ -18,6 +18,7 @@ const pool = new Pool({
 
 const initializeDatabase = async () => {
   try {
+    // Create users table WITHOUT plan_expiry
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         userid SERIAL PRIMARY KEY,
@@ -34,6 +35,40 @@ const initializeDatabase = async () => {
       )
     `);
     console.log('Users table created/verified');
+
+    // Create transactions table WITH expiry_date
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        transaction_id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(userid) ON DELETE CASCADE,
+        razorpay_order_id VARCHAR(100) UNIQUE,
+        razorpay_payment_id VARCHAR(100) UNIQUE,
+        razorpay_signature VARCHAR(255),
+        amount DECIMAL(10, 2) NOT NULL,
+        currency VARCHAR(10) DEFAULT 'INR',
+        status VARCHAR(50) DEFAULT 'pending',
+        plan VARCHAR(50) NOT NULL,
+        plan_duration INTEGER NOT NULL, -- in days
+        transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expiry_date DATE, -- Expiry date for this transaction
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Transactions table created/verified');
+
+    // Create indexes
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_transactions_expiry ON transactions(expiry_date);
+    `);
+
+    console.log('Database indexes created/verified');
 
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
