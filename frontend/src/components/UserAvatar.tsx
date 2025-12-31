@@ -39,7 +39,7 @@ export default function UserAvatar({ isMobile = false }: UserAvatarProps) {
 
   const handleMyPlanClick = () => {
     setIsOpen(false);
-    navigate('/subscription');
+    navigate('/pricing');
   };
 
   const handleSettingsClick = () => {
