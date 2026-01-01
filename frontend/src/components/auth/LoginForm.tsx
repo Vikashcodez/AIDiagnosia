@@ -121,6 +121,15 @@ export default function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-sm text-medical-600 hover:text-medical-700 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
 
             <Button type="submit" className="w-full bg-medical-500 hover:bg-medical-600 text-white">

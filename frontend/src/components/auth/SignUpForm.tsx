@@ -5,8 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, User, Mail, Lock, Calendar, ShieldAlert } from "lucide-react";
+import { UserPlus, User, Mail, Lock, Calendar, ShieldAlert, HelpCircle } from "lucide-react";
 import { PasswordStrengthChecker } from "./PasswordStrengthChecker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "In what city were you born?",
+  "What was the name of your elementary school?",
+  "What is your favorite book?",
+  "What was your childhood nickname?",
+  "What is the name of your favorite teacher?",
+  "What street did you grow up on?",
+];
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -15,6 +33,10 @@ export default function SignUpForm() {
     age: "",
     password: "",
     confirmPassword: "",
+    question1: "",
+    question1_ans: "",
+    question2: "",
+    question2_ans: "",
   });
   const [isPasswordStrong, setIsPasswordStrong] = useState(false);
   const navigate = useNavigate();
@@ -36,6 +58,24 @@ export default function SignUpForm() {
       toast({
         title: "Weak Password",
         description: "Please choose a stronger password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.question1 || !formData.question1_ans || !formData.question2 || !formData.question2_ans) {
+      toast({
+        title: "Security Questions Required",
+        description: "Please answer both security questions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.question1 === formData.question2) {
+      toast({
+        title: "Error",
+        description: "Please select two different security questions",
         variant: "destructive",
       });
       return;
@@ -124,6 +164,81 @@ export default function SignUpForm() {
             required
           />
         </div>
+
+        {/* Security Questions Section */}
+        <div className="pt-4 space-y-4 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <ShieldAlert className="h-4 w-4" />
+            <span className="font-medium">Security Questions (for password recovery)</span>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="relative">
+              <HelpCircle className="absolute left-3 top-3 h-5 w-5 text-gray-400 z-10" />
+              <Select
+                value={formData.question1}
+                onValueChange={(value) => setFormData({ ...formData, question1: value })}
+              >
+                <SelectTrigger className="pl-10">
+                  <SelectValue placeholder="Select first security question" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SECURITY_QUESTIONS.map((question, index) => (
+                    <SelectItem 
+                      key={index} 
+                      value={question}
+                      disabled={question === formData.question2}
+                    >
+                      {question}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              type="text"
+              placeholder="Your answer"
+              value={formData.question1_ans}
+              onChange={(e) => setFormData({ ...formData, question1_ans: e.target.value })}
+              disabled={!formData.question1}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="relative">
+              <HelpCircle className="absolute left-3 top-3 h-5 w-5 text-gray-400 z-10" />
+              <Select
+                value={formData.question2}
+                onValueChange={(value) => setFormData({ ...formData, question2: value })}
+              >
+                <SelectTrigger className="pl-10">
+                  <SelectValue placeholder="Select second security question" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SECURITY_QUESTIONS.map((question, index) => (
+                    <SelectItem 
+                      key={index} 
+                      value={question}
+                      disabled={question === formData.question1}
+                    >
+                      {question}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              type="text"
+              placeholder="Your answer"
+              value={formData.question2_ans}
+              onChange={(e) => setFormData({ ...formData, question2_ans: e.target.value })}
+              disabled={!formData.question2}
+              required
+            />
+          </div>
+        </div>
+
         <Button 
           type="submit" 
           className="w-full bg-medical-500 hover:bg-medical-600 text-white"

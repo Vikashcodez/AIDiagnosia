@@ -4,7 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Phone, Calendar, MapPin, Lock, UserPlus } from "lucide-react";
+import { User, Mail, Phone, Calendar, MapPin, Lock, UserPlus, HelpCircle, ShieldAlert } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "In what city were you born?",
+  "What was the name of your elementary school?",
+  "What is your favorite book?",
+  "What was your childhood nickname?",
+  "What is the name of your favorite teacher?",
+  "What street did you grow up on?",
+];
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,7 +33,11 @@ export default function Register() {
     confirmPassword: "",
     gender: "",
     dob: "",
-    address: ""
+    address: "",
+    question1: "",
+    question1_ans: "",
+    question2: "",
+    question2_ans: ""
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -51,6 +73,25 @@ export default function Register() {
       return;
     }
 
+    // Validate security questions
+    if (!formData.question1 || !formData.question1_ans || !formData.question2 || !formData.question2_ans) {
+      toast({
+        title: "Security Questions Required",
+        description: "Please answer both security questions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.question1 === formData.question2) {
+      toast({
+        title: "Error",
+        description: "Please select two different security questions",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -62,7 +103,11 @@ export default function Register() {
         password: formData.password,
         gender: formData.gender || undefined,
         dob: formData.dob || undefined,
-        address: formData.address || undefined
+        address: formData.address || undefined,
+        question1: formData.question1,
+        question1_ans: formData.question1_ans,
+        question2: formData.question2,
+        question2_ans: formData.question2_ans
       };
 
       const response = await fetch("http://localhost:5000/api/auth/register", {
@@ -261,6 +306,102 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Security Questions Section */}
+          <div className="pt-4 space-y-4 border-t border-gray-200">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <ShieldAlert className="h-4 w-4" />
+              <span className="font-medium">Security Questions (for password recovery)</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Security Question 1 */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Security Question 1 *
+                </label>
+                <div className="relative">
+                  <HelpCircle className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                  <Select
+                    value={formData.question1}
+                    onValueChange={(value) => setFormData({ ...formData, question1: value })}
+                  >
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder="Select first security question" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SECURITY_QUESTIONS.map((question, index) => (
+                        <SelectItem 
+                          key={index} 
+                          value={question}
+                          disabled={question === formData.question2}
+                        >
+                          {question}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Answer 1 *
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Your answer"
+                  value={formData.question1_ans}
+                  onChange={(e) => setFormData({ ...formData, question1_ans: e.target.value })}
+                  disabled={!formData.question1}
+                  required
+                />
+              </div>
+
+              {/* Security Question 2 */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Security Question 2 *
+                </label>
+                <div className="relative">
+                  <HelpCircle className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                  <Select
+                    value={formData.question2}
+                    onValueChange={(value) => setFormData({ ...formData, question2: value })}
+                  >
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder="Select second security question" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SECURITY_QUESTIONS.map((question, index) => (
+                        <SelectItem 
+                          key={index} 
+                          value={question}
+                          disabled={question === formData.question1}
+                        >
+                          {question}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Answer 2 *
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Your answer"
+                  value={formData.question2_ans}
+                  onChange={(e) => setFormData({ ...formData, question2_ans: e.target.value })}
+                  disabled={!formData.question2}
+                  required
                 />
               </div>
             </div>

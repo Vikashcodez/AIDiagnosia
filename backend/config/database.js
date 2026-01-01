@@ -13,7 +13,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'auth_system',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
 });
 
 const initializeDatabase = async () => {
@@ -30,11 +30,29 @@ const initializeDatabase = async () => {
         password VARCHAR(255) NOT NULL,
         address TEXT,
         role VARCHAR(20) DEFAULT 'user',
+        question1 VARCHAR(255),
+        question1_ans VARCHAR(255),
+        question2 VARCHAR(255),
+        question2_ans VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
     console.log('Users table created/verified');
+
+    // Add security question columns if they don't exist (for existing tables)
+    try {
+      await pool.query(`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS question1 VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS question1_ans VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS question2 VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS question2_ans VARCHAR(255)
+      `);
+      console.log('Security question columns added/verified');
+    } catch (err) {
+      console.log('Security columns may already exist:', err.message);
+    }
 
     // Create transactions table WITH expiry_date
     await pool.query(`

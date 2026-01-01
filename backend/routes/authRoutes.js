@@ -4,7 +4,10 @@ import {
   registerUser,
   loginUser,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  getSecurityQuestions,
+  verifySecurityAnswers,
+  resetPassword
 } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
@@ -27,6 +30,11 @@ const loginValidation = [
 // Public routes
 router.post('/register', registerValidation, registerUser);
 router.post('/login', loginValidation, loginUser);
+
+// Forgot password routes
+router.get('/security-questions', getSecurityQuestions);
+router.post('/verify-security-answers', verifySecurityAnswers);
+router.post('/reset-password', resetPassword);
 
 // Protected routes (require authentication)
 router.get('/profile', authenticateToken, getUserProfile);

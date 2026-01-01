@@ -6,7 +6,7 @@ import { JWT_SECRET, JWT_EXPIRES_IN, VALIDATION } from '../config/constants.js';
 // User Registration
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, phone_no, password, gender, dob, address } = req.body;
+    const { name, email, phone_no, password, gender, dob, address, question1, question1_ans, question2, question2_ans } = req.body;
 
     // Check if user already exists
     const userExists = await pool.query(
@@ -21,15 +21,17 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Hash password
+    // Hash password and security answers
     const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedAnswer1 = question1_ans ? await bcrypt.hash(question1_ans.toLowerCase().trim(), 10) : null;
+    const hashedAnswer2 = question2_ans ? await bcrypt.hash(question2_ans.toLowerCase().trim(), 10) : null;
 
     // Insert user into database
     const newUser = await pool.query(
-      `INSERT INTO users (name, email, phone_no, password, gender, dob, address) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO users (name, email, phone_no, password, gender, dob, address, question1, question1_ans, question2, question2_ans) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
        RETURNING userid, name, email, phone_no, gender, dob, address, role, created_at`,
-      [name, email, phone_no, hashedPassword, gender, dob, address]
+      [name, email, phone_no, hashedPassword, gender, dob, address, question1, hashedAnswer1, question2, hashedAnswer2]
     );
 
     // Generate JWT token
@@ -188,6 +190,134 @@ export const updateUserProfile = async (req, res) => {
 
   } catch (error) {
     console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Get Security Questions for User
+export const getSecurityQuestions = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    const user = await pool.query(
+      'SELECT question1, question2 FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (user.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      questions: {
+        question1: user.rows[0].question1,
+        question2: user.rows[0].question2
+      }
+    });
+
+  } catch (error) {
+    console.error('Get security questions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Verify Security Answers
+export const verifySecurityAnswers = async (req, res) => {
+  try {
+    const { email, answer1, answer2 } = req.body;
+
+    const user = await pool.query(
+      'SELECT userid, question1_ans, question2_ans FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (user.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify both answers
+    const isAnswer1Valid = await bcrypt.compare(answer1.toLowerCase().trim(), user.rows[0].question1_ans);
+    const isAnswer2Valid = await bcrypt.compare(answer2.toLowerCase().trim(), user.rows[0].question2_ans);
+
+    if (!isAnswer1Valid || !isAnswer2Valid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Security answers are incorrect'
+      });
+    }
+
+    // Generate a temporary token for password reset
+    const resetToken = jwt.sign(
+      { userId: user.rows[0].userid, email: email, type: 'password-reset' },
+      JWT_SECRET,
+      { expiresIn: '15m' } // Valid for 15 minutes
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Security answers verified',
+      resetToken
+    });
+
+  } catch (error) {
+    console.error('Verify security answers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Reset Password
+export const resetPassword = async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    // Verify reset token
+    const decoded = jwt.verify(resetToken, JWT_SECRET);
+    
+    if (decoded.type !== 'password-reset') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid reset token'
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await pool.query(
+      'UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE userid = $2',
+      [hashedPassword, decoded.userId]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server error'
