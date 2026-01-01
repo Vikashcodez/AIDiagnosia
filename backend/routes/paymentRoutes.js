@@ -6,7 +6,8 @@ import {
   getUserPlan,
   getPlans,
   getTransactionHistory,
-  cancelSubscription
+  cancelSubscription,
+  getUserActiveSubscription
 } from '../controllers/paymentController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
@@ -29,5 +30,6 @@ router.post('/verify', authenticateToken, [
 router.get('/my-plan', authenticateToken, getUserPlan);
 router.get('/transactions', authenticateToken, getTransactionHistory);
 router.post('/cancel', authenticateToken, cancelSubscription);
+router.get('/user/:userId', getUserActiveSubscription);
 
 export default router;

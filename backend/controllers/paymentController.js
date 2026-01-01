@@ -468,3 +468,166 @@ export const cancelSubscription = async (req, res) => {
     });
   }
 };
+
+// Get user's active subscription (status = 'completed' AND expiry_date > CURRENT_DATE)
+export const getUserActiveSubscription = async (req, res) => {
+  try {
+    // Get userId from route parameters or authenticated user
+    const userId = req.params.userId || req.user?.userId;
+
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+
+    // Parse userId as integer since your table shows numeric user_id
+    const parsedUserId = parseInt(userId);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format. Must be a number.'
+      });
+    }
+
+    // OPTIONAL: Check if user exists (if you want to keep this check)
+    // Since you're getting error on 'id' column, check what your users table primary key is called
+    // If it's 'user_id' or something else, adjust accordingly
+    // If you don't need this check, you can remove it entirely
+    try {
+      // Try with common column names, adjust based on your actual table
+      const userExists = await pool.query(
+        'SELECT user_id FROM users WHERE user_id = $1',
+        [parsedUserId]
+      );
+
+      // If that fails, try 'id' as fallback (but handle the error)
+      if (userExists.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+    } catch (userCheckError) {
+      // If user check fails due to column issues, skip it or log warning
+      console.warn('User existence check skipped:', userCheckError.message);
+      // You can choose to continue without the check or return error
+      // For now, let's continue since the subscription query will return empty if user doesn't exist
+    }
+
+    // Get user's active subscription from transactions table
+    const activeSubscription = await pool.query(
+      `SELECT 
+        transaction_id,
+        razorpay_order_id,
+        razorpay_payment_id,
+        amount,
+        currency,
+        plan,
+        plan_duration,
+        expiry_date,
+        transaction_date,
+        created_at
+       FROM transactions 
+       WHERE user_id = $1 
+         AND status = 'completed' 
+         AND expiry_date > CURRENT_DATE
+         AND expiry_date IS NOT NULL
+       ORDER BY created_at DESC 
+       LIMIT 1`,
+      [parsedUserId]  // Use parsedUserId
+    );
+
+    if (activeSubscription.rows.length === 0) {
+      return res.status(200).json({
+        success: true,
+        has_active_subscription: false,
+        message: 'No active subscription found'
+      });
+    }
+
+    const subscription = activeSubscription.rows[0];
+    
+    // Get plan details from PLANS constant
+    const planKey = subscription.plan?.toLowerCase();
+    const planDetails = planKey ? (PLANS[planKey.toUpperCase()] || PLANS.BASIC) : PLANS.BASIC;
+
+    // Calculate days remaining safely
+    let daysRemaining = 0;
+    let isActive = false;
+    
+    if (subscription.expiry_date) {
+      const expiryDate = new Date(subscription.expiry_date);
+      const currentDate = new Date();
+      
+      // Reset time to compare dates only
+      currentDate.setHours(0, 0, 0, 0);
+      
+      daysRemaining = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
+      isActive = daysRemaining > 0;
+    }
+
+    // Format dates for response
+    const formatDate = (date) => {
+      return date ? new Date(date).toISOString().split('T')[0] : null;
+    };
+
+    res.status(200).json({
+      success: true,
+      has_active_subscription: true,
+      subscription: {
+        transaction_id: subscription.transaction_id,
+        razorpay_order_id: subscription.razorpay_order_id,
+        razorpay_payment_id: subscription.razorpay_payment_id,
+        amount: parseFloat(subscription.amount) || 0,
+        currency: subscription.currency || 'INR',
+        plan: subscription.plan || 'BASIC',
+        plan_name: planDetails.name,
+        plan_price: planDetails.price,
+        plan_duration: subscription.plan_duration,
+        plan_features: planDetails.features || [],
+        expiry_date: formatDate(subscription.expiry_date),
+        transaction_date: formatDate(subscription.transaction_date),
+        days_remaining: daysRemaining,
+        is_active: isActive,
+        user_id: parsedUserId  // Include user_id in response for clarity
+      }
+    });
+
+  } catch (error) {
+    console.error('Get active subscription error:', error);
+    
+    // Handle specific database errors
+    if (error.code === '22P02' || error.code === '42703') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid data format or column does not exist'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get active subscription',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Helper function to validate userId format
+function isValidUserId(userId) {
+  // Check if userId is a number (if using numeric IDs)
+  if (!isNaN(userId) && Number.isInteger(parseFloat(userId))) {
+    return true;
+  }
+  
+  // Check if userId is a valid UUID (if using UUIDs)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(userId)) {
+    return true;
+  }
+  
+  // Add any other validation logic based on your user ID format
+  return false;
+}
